@@ -2,22 +2,31 @@ package com.xujiaji.todo.module.main;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.AnticipateOvershootInterpolator;
+import android.view.animation.OvershootInterpolator;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
@@ -27,6 +36,7 @@ import com.bumptech.glide.request.transition.Transition;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.entity.MultiItemEntity;
 import com.xujiaji.happybubble.BubbleDialog;
+import com.xujiaji.happybubble.BubbleLayout;
 import com.xujiaji.happybubble.Util;
 import com.xujiaji.todo.R;
 import com.xujiaji.todo.base.App;
@@ -47,6 +57,7 @@ import java.util.List;
 
 public class MainActivity extends  BaseActivity<MainPresenter> implements MainContract.View, SwipeRefreshLayout.OnRefreshListener {
 
+    private BottomNavigationView mBottomNavigationView;
     private SwipeRefreshLayout mRefresh;
     private RecyclerView mTodoListView;
     private TodoAdapter mTodoAdapter;
@@ -57,8 +68,8 @@ public class MainActivity extends  BaseActivity<MainPresenter> implements MainCo
     private View mBubbleDialogView;
     private BubbleDialog mContentBubbleDialog;
     private TextView mContentBubbleDialogText;
-    private View mHeadView;
-    private TextView mHeadViewText;
+//    private View mHeadView;
+//    private TextView mHeadViewText;
     private int mCategory;
     private final SparseArray<TodoTypeBean> mTypeBeanMap = new SparseArray<>();
 
@@ -82,6 +93,7 @@ public class MainActivity extends  BaseActivity<MainPresenter> implements MainCo
         super.onInitCircle();
         mPostFragment = new PostFragment();
 
+        mBottomNavigationView  = findViewById(R.id.navigation);
         mFragmentContainerView = findViewById(R.id.fragmentContainer);
         mTodoListView          = findViewById(R.id.todoListView);
         mRefresh               = findViewById(R.id.refresh);
@@ -90,10 +102,10 @@ public class MainActivity extends  BaseActivity<MainPresenter> implements MainCo
         mTodoListView.setAdapter(mTodoAdapter = new TodoAdapter(presenter));
         EmptyViewHelper.initEmpty(mTodoListView);
 
-        mTodoAdapter.addHeaderView(mHeadView = LayoutInflater.from(this).inflate(R.layout.layout_home_head, mTodoListView, false));
-        mHeadViewText = mHeadView.findViewById(R.id.tvCategory);
+        mTodoAdapter.addHeaderView(LayoutInflater.from(this).inflate(R.layout.layout_home_head, mTodoListView, false));
+//        mHeadViewText = mHeadView.findViewById(R.id.tvCategory);
 
-        ToolbarHelper.initPaddingTopDiffBar(mHeadView);
+//        ToolbarHelper.initPaddingTopDiffBar(mHeadView);
 
         View view = getLayoutInflater().inflate(R.layout.layout_content, null);
         mContentBubbleDialogText = view.findViewById(R.id.tvContent);
@@ -113,12 +125,12 @@ public class MainActivity extends  BaseActivity<MainPresenter> implements MainCo
     public void onListenerCircle() {
         super.onListenerCircle();
         mRefresh.setOnRefreshListener(this);
-        mHeadView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showChooseTodoCategory();
-            }
-        });
+//        mHeadView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                showChooseTodoCategory(v);
+//            }
+//        });
         mTodoAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
@@ -145,6 +157,26 @@ public class MainActivity extends  BaseActivity<MainPresenter> implements MainCo
                     return true;
                 }
                 return false;
+            }
+        });
+
+        mBottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                if (!menuItem.isChecked()) return true;
+
+                if (menuItem.getItemId() == R.id.navigation_category) {
+                    View icon = ((ViewGroup)((ViewGroup)mBottomNavigationView.getChildAt(0)).getChildAt(0)).getChildAt(0);
+                    icon.setRotation(0);
+                    icon
+                            .animate()
+                            .setDuration(1000)
+                            .setInterpolator(new OvershootInterpolator())
+                            .rotation(120)
+                            .start();
+                    showChooseTodoCategory(((ViewGroup)mBottomNavigationView.getChildAt(0)).getChildAt(0));
+                }
+                return true;
             }
         });
     }
@@ -229,13 +261,14 @@ public class MainActivity extends  BaseActivity<MainPresenter> implements MainCo
     }
 
     @Override
-    public void showChooseTodoCategory() {
+    public void showChooseTodoCategory(View anchorView) {
         if (mBubbleDialog == null) {
             mBubbleDialogView = LayoutInflater.from(this).inflate(R.layout.layout_choose_category, null);
+
             mBubbleDialog = new BubbleDialog(this)
-                    .setPosition(BubbleDialog.Position.BOTTOM)
+                    .setPosition(BubbleDialog.Position.TOP)
                     .addContentView(mBubbleDialogView)
-                    .setRelativeOffset(-24)
+                    .setRelativeOffset(8)
                     .setBubbleLayout(BubbleCreator.get(this));
             if (mBubbleDialog.getWindow() != null)
                 mBubbleDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
@@ -308,7 +341,7 @@ public class MainActivity extends  BaseActivity<MainPresenter> implements MainCo
                 }
             }
         });
-        mBubbleDialog.setClickedView(mHeadView);
+        mBubbleDialog.setClickedView(anchorView);
         mBubbleDialog.show();
     }
 
@@ -393,16 +426,16 @@ public class MainActivity extends  BaseActivity<MainPresenter> implements MainCo
         mCategory = category;
         switch (mCategory) {
             case MainContract.CATEGORY_USE_ONE:
-                mHeadViewText.setText(R.string.use_one);
+                mBottomNavigationView.getMenu().getItem(0).setTitle(R.string.use_one);
                 break;
             case MainContract.CATEGORY_WORK:
-                mHeadViewText.setText(R.string.work);
+                mBottomNavigationView.getMenu().getItem(0).setTitle(R.string.work);
                 break;
             case MainContract.CATEGORY_LEARN:
-                mHeadViewText.setText(R.string.learn);
+                mBottomNavigationView.getMenu().getItem(0).setTitle(R.string.learn);
                 break;
             case MainContract.CATEGORY_LIFE:
-                mHeadViewText.setText(R.string.life);
+                mBottomNavigationView.getMenu().getItem(0).setTitle(R.string.life);
                 break;
         }
         onRefresh();

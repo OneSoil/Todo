@@ -49,7 +49,7 @@ public class MainContract {
 
     interface View extends XContract.View {
         void displayList(TodoTypeBean todoTypeBean);
-        void showChooseTodoCategory();
+        void showChooseTodoCategory(android.view.View anchorView);
         void hideChooseTodoCategory();
         void showDeleteTip(int position, TodoTypeBean.TodoListBean.TodoBean todoBean);
         void showLongClickDialog(android.view.View clickView, final int position, final TodoTypeBean.TodoListBean.TodoBean todoBean);

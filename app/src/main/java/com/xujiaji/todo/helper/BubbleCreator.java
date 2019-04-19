@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.support.v4.content.ContextCompat;
 
 import com.xujiaji.happybubble.BubbleLayout;
+import com.xujiaji.happybubble.Util;
 import com.xujiaji.todo.R;
 
 /**
@@ -15,6 +16,9 @@ public class BubbleCreator {
 
     public static BubbleLayout get(Activity activity) {
         BubbleLayout bl = new BubbleLayout(activity);
+        bl.setLookLength(Util.dpToPx(activity, 13));
+        bl.setLookWidth(Util.dpToPx(activity, 18));
+        bl.setBubbleRadius(Util.dpToPx(activity, 5));
         bl.setShadowColor(ContextCompat.getColor(activity, R.color.colorAccent));
         return bl;
     }

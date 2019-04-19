@@ -56,4 +56,7 @@
     <string name="one_sentence">一句</string>
     <string name="open">开</string>
     <string name="close">关</string>
+    <string name="category">分类</string>
+    <string name="myself">我的</string>
+    <string name="category_default">默认分类</string>
 </resources>

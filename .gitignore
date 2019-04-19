@@ -11,3 +11,6 @@
 /.idea/caches/build_file_checksums.ser
 /xu.jks
 
+.idea/caches/gradle_models.ser
+.idea/encodings.xml
+app/release/
